@@ -1,0 +1,14 @@
+.direnv/
+.terraform/
+result
+result-*
+*.tfplan
+*.tfstate
+*.tfstate.*
+secrets/
+certs/
+inventory.json
+domain.env
+site.nix
+!examples/inventory.json
+!examples/domain.env

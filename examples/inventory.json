@@ -1,0 +1,36 @@
+{
+  "template": {
+    "vmId": 9000,
+    "name": "nixos-example-base",
+    "node": "pve-example",
+    "datastore": "local-lvm"
+  },
+  "network": {
+    "bridge": "vmbr0",
+    "cidr": "192.0.2.0/24",
+    "gateway": "192.0.2.1",
+    "prefixLength": 24,
+    "nameservers": ["192.0.2.13"]
+  },
+  "operatorSshPublicKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEeXAMPLEeXAMPLEeXAMPLEeXAMPLEeXAMPLEeXAMP example",
+  "machines": {
+    "canary": { "vmId": 100, "address": "192.0.2.10", "macAddress": "02:00:00:00:00:10", "cores": 2, "memory": 4096, "diskSize": 30 },
+    "forgejo": { "vmId": 101, "address": "192.0.2.11", "macAddress": "02:00:00:00:00:11", "cores": 2, "memory": 4096, "diskSize": 30 },
+    "haproxy": { "vmId": 102, "address": "192.0.2.12", "macAddress": "02:00:00:00:00:12", "cores": 2, "memory": 2048, "diskSize": 20 },
+    "bind": { "vmId": 103, "address": "192.0.2.13", "macAddress": "02:00:00:00:00:13", "cores": 1, "memory": 2048, "diskSize": 16 },
+    "forgejo-runner": { "vmId": 104, "address": "192.0.2.14", "macAddress": "02:00:00:00:00:14", "cores": 2, "memory": 4096, "diskSize": 30 },
+    "observability": { "vmId": 105, "address": "192.0.2.15", "macAddress": "02:00:00:00:00:15", "cores": 2, "memory": 6144, "diskSize": 80 },
+    "postgres": {
+      "vmId": 106, "address": "192.0.2.16", "macAddress": "02:00:00:00:00:16", "cores": 2, "memory": 6144, "diskSize": 30,
+      "dataDisks": [
+        { "interface": "virtio1", "size": 100, "serial": "postgres-data" },
+        { "interface": "virtio2", "size": 100, "serial": "postgres-backup" }
+      ]
+    },
+    "k3s": {
+      "vmId": 107, "address": "192.0.2.17", "macAddress": "02:00:00:00:00:17", "cores": 4, "memory": 12288, "diskSize": 50,
+      "dataDisks": [{ "interface": "virtio1", "size": 500, "serial": "k3s-storage" }]
+    },
+    "openbao": { "vmId": 108, "address": "192.0.2.18", "macAddress": "02:00:00:00:00:18", "cores": 2, "memory": 2048, "diskSize": 20 }
+  }
+}
