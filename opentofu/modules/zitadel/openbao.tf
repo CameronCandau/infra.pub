@@ -40,7 +40,7 @@ resource "zitadel_user_grant" "openbao_admins" {
 
   org_id     = local.organization_id
   project_id = zitadel_project.openbao.id
-  user_id    = var.openbao_admin_users[each.key]
+  user_id    = nonsensitive(var.openbao_admin_users[each.key])
   role_keys  = [zitadel_project_role.openbao_admin.role_key]
 }
 

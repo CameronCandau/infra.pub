@@ -50,7 +50,7 @@ resource "zitadel_user_grant" "immich_admins" {
 
   org_id     = local.organization_id
   project_id = zitadel_project.immich.id
-  user_id    = var.immich_admin_users[each.key]
+  user_id    = nonsensitive(var.immich_admin_users[each.key])
   role_keys  = [zitadel_project_role.immich_user.role_key]
 }
 

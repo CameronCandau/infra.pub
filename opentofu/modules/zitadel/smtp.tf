@@ -5,7 +5,7 @@ resource "zitadel_email_provider_smtp" "smtp" {
   sender_address   = var.smtp.sender_address
   sender_name      = var.smtp.sender_name
   reply_to_address = var.smtp.reply_to_address
-  description      = var.smtp.description
+  description      = nonsensitive(var.smtp.description)
   tls              = true
   set_active       = true
 }
