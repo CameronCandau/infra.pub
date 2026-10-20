@@ -61,9 +61,14 @@ in
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
     secrets = {
-      pgbackrest_b2_key_id = { };
-      pgbackrest_b2_application_key = { };
-      pgbackrest_b2_cipher_pass = { };
+      backup_s3_access_key_id = { };
+      backup_s3_secret_access_key = { };
+      pgbackrest_cipher_pass = { };
+
+      backup_s3_endpoint.sopsFile = secretFiles.backupStorage;
+      backup_s3_region.sopsFile = secretFiles.backupStorage;
+      backup_s3_bucket.sopsFile = secretFiles.backupStorage;
+
       zitadel-db-password = {
         owner = "postgres";
         group = "postgres";
@@ -78,21 +83,24 @@ in
       };
     };
 
-    templates."pgbackrest-b2.conf" = {
+    templates."pgbackrest-remote.conf" = {
       owner = "postgres";
       group = "postgres";
       mode = "0400";
       content = ''
         [global]
-        repo2-s3-key=${config.sops.placeholder.pgbackrest_b2_key_id}
-        repo2-s3-key-secret=${config.sops.placeholder.pgbackrest_b2_application_key}
-        repo2-cipher-pass=${config.sops.placeholder.pgbackrest_b2_cipher_pass}
+        repo2-s3-key=${config.sops.placeholder.backup_s3_access_key_id}
+        repo2-s3-key-secret=${config.sops.placeholder.backup_s3_secret_access_key}
+        repo2-s3-bucket=${config.sops.placeholder.backup_s3_bucket}
+        repo2-s3-endpoint=${config.sops.placeholder.backup_s3_endpoint}
+        repo2-s3-region=${config.sops.placeholder.backup_s3_region}
+        repo2-cipher-pass=${config.sops.placeholder.pgbackrest_cipher_pass}
       '';
     };
   };
 
-  environment.etc."pgbackrest/conf.d/b2.conf".source =
-    config.sops.templates."pgbackrest-b2.conf".path;
+  environment.etc."pgbackrest/conf.d/remote.conf".source =
+    config.sops.templates."pgbackrest-remote.conf".path;
 
   security.acme.certs."postgres.${site.domain}" = {
     postRun = ''
@@ -182,9 +190,6 @@ in
         bundle = true;
         cipher-type = "aes-256-cbc";
 
-        s3-bucket = "OversightConformDeflationUnderling";
-        s3-endpoint = "s3.us-west-004.backblazeb2.com";
-        s3-region = "us-west-004";
         s3-uri-style = "path";
 
         retention-diff = 30;

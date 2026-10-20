@@ -25,9 +25,14 @@ in
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
     secrets = {
-      backup_b2_key_id = { };
-      backup_b2_application_key = { };
+      backup_s3_access_key_id = { };
+      backup_s3_secret_access_key = { };
       backup_restic_password = { };
+
+      backup_s3_endpoint.sopsFile = secretFiles.backupStorage;
+      backup_s3_region.sopsFile = secretFiles.backupStorage;
+      backup_s3_bucket.sopsFile = secretFiles.backupStorage;
+
       backup_approle_role_id = { };
       backup_approle_secret_id = { };
     };
@@ -96,7 +101,7 @@ in
   };
 
   systemd.services.openbao-backup = {
-    description = "Back up OpenBao Raft storage to B2";
+    description = "Back up OpenBao Raft storage to off-host object storage";
     path = [ pkgs.bash ];
     wants = [ "network-online.target" ];
     requires = [ "openbao.service" ];
@@ -135,14 +140,23 @@ in
       export BAO_TOKEN
 
       export AWS_ACCESS_KEY_ID="$(
-        ${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.backup_b2_key_id.path}
+        ${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.backup_s3_access_key_id.path}
       )"
       export AWS_SECRET_ACCESS_KEY="$(
-        ${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.backup_b2_application_key.path}
+        ${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.backup_s3_secret_access_key.path}
       )"
-      export AWS_DEFAULT_REGION=us-west-004
+      export AWS_DEFAULT_REGION="$(
+        ${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.backup_s3_region.path}
+      )"
       export RESTIC_PASSWORD_FILE=${config.sops.secrets.backup_restic_password.path}
-      export RESTIC_REPOSITORY=s3:s3.us-west-004.backblazeb2.com/OversightConformDeflationUnderling/openbao
+
+      backup_s3_endpoint="$(
+        ${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.backup_s3_endpoint.path}
+      )"
+      backup_s3_bucket="$(
+        ${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.backup_s3_bucket.path}
+      )"
+      export RESTIC_REPOSITORY="s3:$backup_s3_endpoint/$backup_s3_bucket/openbao"
 
       if ! ${lib.getExe pkgs.restic} cat config --no-cache >/dev/null 2>&1; then
         ${lib.getExe pkgs.restic} init

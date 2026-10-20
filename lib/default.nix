@@ -18,6 +18,7 @@ let
     else
       builtins.head match;
   singleSecretFile = path: {
+    backupStorage = path;
     acme = path;
     hosts = {
       canary = path;
