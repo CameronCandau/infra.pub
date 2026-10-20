@@ -27,6 +27,14 @@ in
         address = machine.address;
         prefixLength = inventory.network.prefixLength;
       }
+      {
+        address = inventory.serviceVips.user;
+        prefixLength = inventory.network.prefixLength;
+      }
+      {
+        address = inventory.serviceVips.admin;
+        prefixLength = inventory.network.prefixLength;
+      }
     ];
 
     firewall.allowedTCPPorts = [
@@ -59,14 +67,21 @@ in
 
               acl host_openbao hdr(host) -i bao.${site.domain}
               acl host_immich hdr(host) -i immich.${site.domain}
+              acl host_forgejo hdr(host) -i forgejo.${site.domain}
+              acl host_grafana hdr(host) -i grafana.${site.domain}
               acl source_lan src ${inventory.network.cidr}
+              acl source_netbird_router src ${inventory.machines.netbird-router.address}
+              acl destination_user_services dst ${inventory.serviceVips.user}
+              acl destination_admin_services dst ${inventory.serviceVips.admin}
               http-request deny deny_status 404 if host_openbao !source_lan
               http-request deny deny_status 404 if host_immich !source_lan
+              http-request deny deny_status 404 if source_netbird_router host_immich !destination_user_services
+              http-request deny deny_status 404 if source_netbird_router host_forgejo !destination_user_services
+              http-request deny deny_status 404 if source_netbird_router host_grafana !destination_admin_services
+              http-request deny deny_status 404 if source_netbird_router host_openbao !destination_admin_services
 
-              acl host_forgejo hdr(host) -i forgejo.${site.domain}
               use_backend forgejo-web if host_forgejo
 
-              acl host_grafana hdr(host) -i grafana.${site.domain}
               use_backend grafana if host_grafana
 
               acl host_zitadel hdr(host) -i auth.${site.domain}

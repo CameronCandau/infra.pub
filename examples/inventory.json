@@ -13,6 +13,10 @@
     "nameservers": ["192.0.2.13"]
   },
   "operatorSshPublicKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEeXAMPLEeXAMPLEeXAMPLEeXAMPLEeXAMPLEeXAMP example",
+  "serviceVips": {
+    "user": "192.0.2.20",
+    "admin": "192.0.2.21"
+  },
   "machines": {
     "canary": { "vmId": 100, "address": "192.0.2.10", "macAddress": "02:00:00:00:00:10", "cores": 2, "memory": 4096, "diskSize": 30 },
     "forgejo": { "vmId": 101, "address": "192.0.2.11", "macAddress": "02:00:00:00:00:11", "cores": 2, "memory": 4096, "diskSize": 30 },
@@ -31,6 +35,7 @@
       "vmId": 107, "address": "192.0.2.17", "macAddress": "02:00:00:00:00:17", "cores": 4, "memory": 12288, "diskSize": 50,
       "dataDisks": [{ "interface": "virtio1", "size": 500, "serial": "k3s-storage" }]
     },
-    "openbao": { "vmId": 108, "address": "192.0.2.18", "macAddress": "02:00:00:00:00:18", "cores": 2, "memory": 2048, "diskSize": 20 }
+    "openbao": { "vmId": 108, "address": "192.0.2.18", "macAddress": "02:00:00:00:00:18", "cores": 2, "memory": 2048, "diskSize": 20 },
+    "netbird-router": { "vmId": 109, "address": "192.0.2.19", "macAddress": "02:00:00:00:00:19", "cores": 1, "memory": 1024, "diskSize": 16 }
   }
 }

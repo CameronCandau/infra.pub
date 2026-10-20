@@ -9,6 +9,7 @@ The complete example uses only `example.test`, TEST-NET addresses, and placehold
 The private deployment pins this repository and supplies:
 
 - an inventory matching `examples/inventory.json`;
+- two HAProxy service VIPs for user and administrator remote-access policy;
 - a validated domain read from a one-line `DOMAIN=<fqdn>` file;
 - ACME contact and Forgejo runner settings;
 - SOPS files for each host and ACME;

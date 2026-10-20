@@ -37,6 +37,7 @@ let
       site,
     }:
     let
+      machineAddresses = map (machine: machine.address) (builtins.attrValues inventory.machines);
       nixosLib = lib.extend (
         final: previous: {
           mkRenamedOptionModuleWith =
@@ -75,6 +76,13 @@ let
         };
     in
     assert builtins.match domainPattern site.domain != null;
+    assert lib.assertMsg (
+      inventory.serviceVips.user != inventory.serviceVips.admin
+    ) "service VIPs must be distinct";
+    assert lib.assertMsg (
+      !builtins.elem inventory.serviceVips.user machineAddresses
+      && !builtins.elem inventory.serviceVips.admin machineAddresses
+    ) "service VIPs must not match a machine address";
     {
       image = mkSystem ../nixos/image.nix;
       canary = mkSystem ../nixos/hosts/canary;
@@ -86,6 +94,7 @@ let
       postgres = mkSystem ../nixos/hosts/postgres;
       k3s = mkSystem ../nixos/hosts/k3s;
       openbao = mkSystem ../nixos/hosts/openbao;
+      netbird-router = mkSystem ../nixos/hosts/netbird-router;
     };
 in
 {
