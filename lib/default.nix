@@ -25,6 +25,7 @@ let
       canary = path;
       forgejo = path;
       forgejo-runner = path;
+      identity = path;
       k3s = path;
       observability = path;
       openbao = path;
