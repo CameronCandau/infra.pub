@@ -64,8 +64,37 @@
   sops = {
     defaultSopsFile = secretFiles.hosts.identity;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    secrets.zitadel-db-password.restartUnits = [ "postgresql-setup.service" ];
+
+    secrets = {
+      backup_s3_access_key_id = { };
+      backup_s3_secret_access_key = { };
+      pgbackrest_cipher_pass = { };
+
+      backup_s3_endpoint.sopsFile = secretFiles.backupStorage;
+      backup_s3_region.sopsFile = secretFiles.backupStorage;
+      backup_s3_bucket.sopsFile = secretFiles.backupStorage;
+
+      zitadel-db-password.restartUnits = [ "postgresql-setup.service" ];
+    };
+
+    templates."pgbackrest-remote.conf" = {
+      owner = "postgres";
+      group = "postgres";
+      mode = "0400";
+      content = ''
+        [global]
+        repo1-s3-key=${config.sops.placeholder.backup_s3_access_key_id}
+        repo1-s3-key-secret=${config.sops.placeholder.backup_s3_secret_access_key}
+        repo1-s3-bucket=${config.sops.placeholder.backup_s3_bucket}
+        repo1-s3-endpoint=${config.sops.placeholder.backup_s3_endpoint}
+        repo1-s3-region=${config.sops.placeholder.backup_s3_region}
+        repo1-cipher-pass=${config.sops.placeholder.pgbackrest_cipher_pass}
+      '';
+    };
   };
+
+  environment.etc."pgbackrest/conf.d/remote.conf".source =
+    config.sops.templates."pgbackrest-remote.conf".path;
 
   services.postgresql = {
     enable = true;
@@ -104,5 +133,93 @@
 
       unset ZITADEL_DB_PASSWORD
     '';
+  };
+
+  services.pgbackrest = {
+    enable = true;
+    settings = {
+      archive-async = true;
+      lock-path = "/run/pgbackrest";
+      spool-path = "/var/spool/pgbackrest";
+      start-fast = true;
+    };
+    repos.remote = {
+      type = "s3";
+      path = "/identity";
+      bundle = true;
+      cipher-type = "aes-256-cbc";
+      s3-uri-style = "path";
+      retention-diff = 30;
+      retention-full = 8;
+    };
+    stanzas.default.jobs = {
+      daily = {
+        schedule = "Mon..Sat *-*-* 04:00:00 America/Los_Angeles";
+        type = "diff";
+      };
+      weekly = {
+        schedule = "Sun *-*-* 04:00:00 America/Los_Angeles";
+        type = "full";
+      };
+    };
+  };
+
+  users.users.pgbackrest.createHome = lib.mkForce false;
+
+  systemd.tmpfiles.rules = [
+    "d /var/spool/pgbackrest 0750 postgres postgres -"
+    "d /run/pgbackrest 0750 postgres postgres -"
+  ];
+
+  systemd.services = {
+    pgbackrest-stanza-create = {
+      description = "Create pgBackRest stanza";
+      wantedBy = [ "multi-user.target" ];
+      requires = [ "postgresql.service" ];
+      after = [ "postgresql.service" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        User = "postgres";
+        Group = "postgres";
+        ExecStart = "${pkgs.pgbackrest}/bin/pgbackrest --stanza=default stanza-create";
+      };
+    };
+
+    pgbackrest-default-daily.serviceConfig = {
+      User = lib.mkForce "postgres";
+      Group = lib.mkForce "postgres";
+    };
+
+    pgbackrest-default-weekly.serviceConfig = {
+      User = lib.mkForce "postgres";
+      Group = lib.mkForce "postgres";
+    };
+
+    pgbackrest-check = {
+      description = "Check pgBackRest repository";
+      serviceConfig = {
+        Type = "oneshot";
+        User = "postgres";
+        Group = "postgres";
+        ExecStart = "${pkgs.pgbackrest}/bin/pgbackrest --stanza=default check";
+      };
+    };
+
+    postgresql.serviceConfig.ReadWritePaths = [
+      "/run/pgbackrest"
+      "/var/spool/pgbackrest"
+    ];
+  };
+
+  systemd.timers.pgbackrest-check = {
+    description = "Check pgBackRest repository weekly";
+    wantedBy = [ "timers.target" ];
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    timerConfig = {
+      OnCalendar = "Mon *-*-* 06:00:00 America/Los_Angeles";
+      Persistent = true;
+    };
   };
 }
