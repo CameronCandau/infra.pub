@@ -1,6 +1,7 @@
 {
   nixpkgs,
   nixpkgs-unstable,
+  disko,
   sops-nix,
   system,
 }:
@@ -60,20 +61,22 @@ let
         }
       );
       mkSystem =
-        module:
+        hostSystem: module:
         nixosLib.nixosSystem {
-          inherit system;
+          system = hostSystem;
           specialArgs = {
             inherit
+              disko
               inventory
               secretFiles
               site
               sops-nix
               ;
-            openbaoPackage = nixpkgs-unstable.legacyPackages.${system}.openbao;
+            openbaoPackage = nixpkgs-unstable.legacyPackages.${hostSystem}.openbao;
           };
           modules = [ module ];
         };
+      mkDefaultSystem = mkSystem system;
     in
     assert builtins.match domainPattern site.domain != null;
     assert lib.assertMsg (
@@ -84,17 +87,18 @@ let
       && !builtins.elem inventory.serviceVips.admin machineAddresses
     ) "service VIPs must not match a machine address";
     {
-      image = mkSystem ../nixos/image.nix;
-      canary = mkSystem ../nixos/hosts/canary;
-      forgejo = mkSystem ../nixos/hosts/forgejo;
-      haproxy = mkSystem ../nixos/hosts/haproxy;
-      bind = mkSystem ../nixos/hosts/bind;
-      forgejo-runner = mkSystem ../nixos/hosts/forgejo-runner;
-      observability = mkSystem ../nixos/hosts/observability;
-      postgres = mkSystem ../nixos/hosts/postgres;
-      k3s = mkSystem ../nixos/hosts/k3s;
-      openbao = mkSystem ../nixos/hosts/openbao;
-      netbird-router = mkSystem ../nixos/hosts/netbird-router;
+      image = mkDefaultSystem ../nixos/image.nix;
+      canary = mkDefaultSystem ../nixos/hosts/canary;
+      forgejo = mkDefaultSystem ../nixos/hosts/forgejo;
+      haproxy = mkDefaultSystem ../nixos/hosts/haproxy;
+      bind = mkDefaultSystem ../nixos/hosts/bind;
+      forgejo-runner = mkDefaultSystem ../nixos/hosts/forgejo-runner;
+      observability = mkDefaultSystem ../nixos/hosts/observability;
+      postgres = mkDefaultSystem ../nixos/hosts/postgres;
+      k3s = mkDefaultSystem ../nixos/hosts/k3s;
+      openbao = mkDefaultSystem ../nixos/hosts/openbao;
+      netbird-router = mkDefaultSystem ../nixos/hosts/netbird-router;
+      identity = mkSystem "aarch64-linux" ../nixos/hosts/identity;
     };
 in
 {

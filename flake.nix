@@ -4,6 +4,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/1e8bc658fc985ef27ccd66d107d767b32bb7ef98";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/e7439b6b14ad3cc35d05608ebca9bce01a25f5f8";
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -12,6 +14,7 @@
     inputs@{
       nixpkgs,
       nixpkgs-unstable,
+      disko,
       sops-nix,
       ...
     }:
@@ -22,6 +25,7 @@
         inherit
           nixpkgs
           nixpkgs-unstable
+          disko
           sops-nix
           system
           ;
