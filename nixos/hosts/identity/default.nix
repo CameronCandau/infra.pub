@@ -71,11 +71,11 @@
       backup_s3_secret_access_key = { };
       pgbackrest_cipher_pass = { };
 
-      zitadel-masterkey.restartUnits = [ "podman-zitadel.service" ];
-      zitadel-initial-admin-password.restartUnits = [ "podman-zitadel.service" ];
-      zitadel-login-certificate.restartUnits = [ "podman-zitadel.service" ];
-      zitadel-login-private-key.restartUnits = [ "podman-zitadel-login.service" ];
-      zitadel-login-session-cookie.restartUnits = [ "podman-zitadel-login.service" ];
+      zitadel-masterkey = { };
+      zitadel-initial-admin-password = { };
+      zitadel-login-certificate = { };
+      zitadel-login-private-key = { };
+      zitadel-login-session-cookie = { };
 
       backup_s3_endpoint.sopsFile = secretFiles.backupStorage;
       backup_s3_region.sopsFile = secretFiles.backupStorage;
@@ -86,8 +86,8 @@
 
     templates = {
       "zitadel.env" = {
-        restartUnits = [ "podman-zitadel.service" ];
         content = ''
+          ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD=${config.sops.placeholder.zitadel-db-password}
           ZITADEL_DATABASE_POSTGRES_USER_PASSWORD=${config.sops.placeholder.zitadel-db-password}
           ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD=${config.sops.placeholder.zitadel-initial-admin-password}
           ZITADEL_MASTERKEY=${config.sops.placeholder.zitadel-masterkey}
@@ -95,7 +95,6 @@
       };
 
       "zitadel-login.env" = {
-        restartUnits = [ "podman-zitadel-login.service" ];
         content = ''
           ZITADEL_SESSION_COOKIE_SECRET=${config.sops.placeholder.zitadel-login-session-cookie}
         '';
@@ -135,6 +134,11 @@
         Port: 5432
         Database: zitadel
         User:
+          Username: zitadel
+          SSL:
+            Mode: disable
+        Admin:
+          ExistingDatabase: zitadel
           Username: zitadel
           SSL:
             Mode: disable
@@ -224,7 +228,7 @@
           autoStart = false;
           image = "ghcr.io/zitadel/zitadel@sha256:956a298405189a8f6cd4ec92e8828b1bd10caa7da8b139c39d251d7053e33784";
           cmd = [
-            "start-from-setup"
+            "start-from-init"
             "--config"
             "/etc/zitadel/config.yaml"
             "--steps"
