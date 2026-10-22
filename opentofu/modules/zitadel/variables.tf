@@ -11,6 +11,10 @@ variable "organization_name" {
   type = string
 }
 
+variable "administrator_user_name" {
+  type = string
+}
+
 variable "users" {
   type = map(object({
     user_name    = string
@@ -39,12 +43,3 @@ variable "immich_user_keys" {
   type = set(string)
 }
 
-variable "immich_admin_users" {
-  type      = map(string)
-  sensitive = true
-}
-
-variable "openbao_admin_users" {
-  type      = map(string)
-  sensitive = true
-}

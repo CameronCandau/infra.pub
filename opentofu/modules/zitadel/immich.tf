@@ -45,12 +45,10 @@ resource "zitadel_user_grant" "immich_users" {
   role_keys  = [zitadel_project_role.immich_user.role_key]
 }
 
-resource "zitadel_user_grant" "immich_admins" {
-  for_each = nonsensitive(toset(keys(var.immich_admin_users)))
-
+resource "zitadel_user_grant" "immich_administrator" {
   org_id     = local.organization_id
   project_id = zitadel_project.immich.id
-  user_id    = nonsensitive(var.immich_admin_users[each.key])
+  user_id    = local.administrator_user_id
   role_keys  = [zitadel_project_role.immich_user.role_key]
 }
 

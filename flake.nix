@@ -36,6 +36,12 @@
           domain = infraLib.readDomainEnv ./examples/domain.env;
           acmeEmail = "admin@example.test";
           forgejoRunnerUuid = "00000000-0000-0000-0000-000000000001";
+          identity = {
+            organizationName = "Example";
+            adminLocalPart = "admin";
+            adminFirstName = "Example";
+            adminLastName = "Admin";
+          };
         };
         secretFiles = infraLib.singleSecretFile ./examples/secrets.yaml;
       };

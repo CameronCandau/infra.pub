@@ -35,12 +35,10 @@ resource "zitadel_application_oidc" "openbao" {
   }
 }
 
-resource "zitadel_user_grant" "openbao_admins" {
-  for_each = nonsensitive(toset(keys(var.openbao_admin_users)))
-
+resource "zitadel_user_grant" "openbao_administrator" {
   org_id     = local.organization_id
   project_id = zitadel_project.openbao.id
-  user_id    = nonsensitive(var.openbao_admin_users[each.key])
+  user_id    = local.administrator_user_id
   role_keys  = [zitadel_project_role.openbao_admin.role_key]
 }
 

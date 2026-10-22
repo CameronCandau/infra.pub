@@ -12,7 +12,6 @@
   imports = [
     disko.nixosModules.disko
     sops-nix.nixosModules.sops
-    ../../acme.nix
     ../../cloud-base.nix
   ];
 
@@ -73,6 +72,7 @@
       pgbackrest_cipher_pass = { };
 
       zitadel-masterkey.restartUnits = [ "podman-zitadel.service" ];
+      zitadel-initial-admin-password.restartUnits = [ "podman-zitadel.service" ];
       zitadel-login-certificate.restartUnits = [ "podman-zitadel.service" ];
       zitadel-login-private-key.restartUnits = [ "podman-zitadel-login.service" ];
       zitadel-login-session-cookie.restartUnits = [ "podman-zitadel-login.service" ];
@@ -89,6 +89,7 @@
         restartUnits = [ "podman-zitadel.service" ];
         content = ''
           ZITADEL_DATABASE_POSTGRES_USER_PASSWORD=${config.sops.placeholder.zitadel-db-password}
+          ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD=${config.sops.placeholder.zitadel-initial-admin-password}
           ZITADEL_MASTERKEY=${config.sops.placeholder.zitadel-masterkey}
         '';
       };
@@ -146,20 +147,49 @@
               - IAM_LOGIN_CLIENT
   '';
 
-  security.acme.certs."auth.${site.domain}" = {
-    group = "caddy";
-    reloadServices = [ "caddy.service" ];
-  };
+  environment.etc."zitadel/steps.yaml".text = ''
+    FirstInstance:
+      MachineKeyPath: /bootstrap/opentofu.json
+      InstanceName: ${builtins.toJSON site.identity.organizationName}
+      Org:
+        Name: ${builtins.toJSON site.identity.organizationName}
+        Human:
+          UserName: ${builtins.toJSON "${site.identity.adminLocalPart}@${site.domain}"}
+          FirstName: ${builtins.toJSON site.identity.adminFirstName}
+          LastName: ${builtins.toJSON site.identity.adminLastName}
+          Email:
+            Address: ${builtins.toJSON "${site.identity.adminLocalPart}@${site.domain}"}
+            Verified: true
+          PasswordChangeRequired: true
+        Machine:
+          Machine:
+            Username: opentofu
+            Name: OpenTofu
+          MachineKey:
+            Type: 1
+  '';
 
   services.caddy = {
     enable = true;
-    virtualHosts."auth.${site.domain}".extraConfig = ''
-      tls /var/lib/acme/auth.${site.domain}/fullchain.pem /var/lib/acme/auth.${site.domain}/key.pem
-
-      @login path /ui/v2/login /ui/v2/login/*
-      reverse_proxy @login 127.0.0.1:3000
-      reverse_proxy h2c://127.0.0.1:8080
+    globalConfig = ''
+      admin 127.0.0.1:2019
+      email ${site.acmeEmail}
+      metrics
     '';
+    virtualHosts."auth.${site.domain}" = {
+      extraConfig = ''
+        @login path /ui/v2/login /ui/v2/login/*
+        reverse_proxy @login 127.0.0.1:3000
+        reverse_proxy h2c://127.0.0.1:8080
+      '';
+      logFormat = ''
+        output stdout
+        format filter {
+          wrap json
+          request>uri regexp \?.*$ ""
+        }
+      '';
+    };
   };
 
   services.postgresql = {
@@ -188,7 +218,7 @@
   virtualisation = {
     oci-containers = {
       backend = "podman";
-      # Keep the empty database untouched until the migration explicitly starts both containers.
+      # Keep the empty database untouched until fresh-instance bootstrap is approved.
       containers = {
         zitadel = {
           autoStart = false;
@@ -197,12 +227,16 @@
             "start-from-setup"
             "--config"
             "/etc/zitadel/config.yaml"
+            "--steps"
+            "/etc/zitadel/steps.yaml"
             "--masterkeyFromEnv"
           ];
           environmentFiles = [ config.sops.templates."zitadel.env".path ];
           ports = [ "127.0.0.1:8080:8080" ];
           volumes = [
             "/etc/zitadel/config.yaml:/etc/zitadel/config.yaml:ro"
+            "/etc/zitadel/steps.yaml:/etc/zitadel/steps.yaml:ro"
+            "/var/lib/zitadel-bootstrap/opentofu.json:/bootstrap/opentofu.json"
             "/run/postgresql:/run/postgresql:ro"
             "${config.sops.secrets.zitadel-login-certificate.path}:/secrets/login-client/tls.crt:ro"
           ];
@@ -284,16 +318,13 @@
   users.users.pgbackrest.createHome = lib.mkForce false;
 
   systemd.tmpfiles.rules = [
+    "d /var/lib/zitadel-bootstrap 0700 root root -"
+    "f /var/lib/zitadel-bootstrap/opentofu.json 0600 root root -"
     "d /var/spool/pgbackrest 0750 postgres postgres -"
     "d /run/pgbackrest 0750 postgres postgres -"
   ];
 
   systemd.services = {
-    caddy = {
-      wants = [ "acme-auth.${site.domain}.service" ];
-      after = [ "acme-auth.${site.domain}.service" ];
-    };
-
     podman-zitadel = {
       requires = [ "postgresql.service" ];
       after = [ "postgresql.service" ];
