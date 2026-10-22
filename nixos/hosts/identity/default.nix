@@ -12,6 +12,7 @@
   imports = [
     disko.nixosModules.disko
     sops-nix.nixosModules.sops
+    ../../acme.nix
     ../../cloud-base.nix
   ];
 
@@ -145,6 +146,22 @@
               - IAM_LOGIN_CLIENT
   '';
 
+  security.acme.certs."auth.${site.domain}" = {
+    group = "caddy";
+    reloadServices = [ "caddy.service" ];
+  };
+
+  services.caddy = {
+    enable = true;
+    virtualHosts."auth.${site.domain}".extraConfig = ''
+      tls /var/lib/acme/auth.${site.domain}/fullchain.pem /var/lib/acme/auth.${site.domain}/key.pem
+
+      @login path /ui/v2/login /ui/v2/login/*
+      reverse_proxy @login 127.0.0.1:3000
+      reverse_proxy h2c://127.0.0.1:8080
+    '';
+  };
+
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_17;
@@ -272,6 +289,11 @@
   ];
 
   systemd.services = {
+    caddy = {
+      wants = [ "acme-auth.${site.domain}.service" ];
+      after = [ "acme-auth.${site.domain}.service" ];
+    };
+
     podman-zitadel = {
       requires = [ "postgresql.service" ];
       after = [ "postgresql.service" ];
@@ -327,4 +349,9 @@
       Persistent = true;
     };
   };
+
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 }
