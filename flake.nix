@@ -41,10 +41,12 @@
             adminLocalPart = "admin";
             adminFirstName = "Example";
             adminLastName = "Admin";
+            publicIPv4 = "192.0.2.1";
           };
           netbird = {
             enable = true;
             localAuthDisabled = false;
+            publicIPv4 = "192.0.2.2";
           };
         };
         secretFiles = infraLib.singleSecretFile ./examples/secrets.yaml;

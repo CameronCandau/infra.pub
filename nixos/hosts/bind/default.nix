@@ -66,6 +66,8 @@ in
         @ 	IN	NS	ns1.${site.domain}.
         ns1	IN	A	${machine.address}
         postgres  IN  A ${inventory.machines.postgres.address}
+        auth      IN  A ${site.identity.publicIPv4}
+        netbird   IN  A ${site.netbird.publicIPv4}
 
         @	IN	A	${inventory.machines.haproxy.address}
         *	IN	A	${inventory.machines.haproxy.address}

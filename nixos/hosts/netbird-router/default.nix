@@ -37,6 +37,8 @@ in
     ];
     firewall.extraForwardRules = ''
       iifname "wt0" oifname "ens18" ip daddr { ${inventory.serviceVips.user}, ${inventory.serviceVips.admin} } tcp dport 443 accept
+      iifname "wt0" oifname "ens18" ip daddr ${inventory.machines.bind.address} udp dport 53 accept
+      iifname "wt0" oifname "ens18" ip daddr ${inventory.machines.bind.address} tcp dport 53 accept
     '';
   };
 }
