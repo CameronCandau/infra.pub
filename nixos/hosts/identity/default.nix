@@ -73,9 +73,6 @@
 
       zitadel-masterkey = { };
       zitadel-initial-admin-password = { };
-      zitadel-login-certificate = { };
-      zitadel-login-private-key = { };
-      zitadel-login-session-cookie = { };
 
       backup_s3_endpoint.sopsFile = secretFiles.backupStorage;
       backup_s3_region.sopsFile = secretFiles.backupStorage;
@@ -91,12 +88,6 @@
           ZITADEL_DATABASE_POSTGRES_USER_PASSWORD=${config.sops.placeholder.zitadel-db-password}
           ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD=${config.sops.placeholder.zitadel-initial-admin-password}
           ZITADEL_MASTERKEY=${config.sops.placeholder.zitadel-masterkey}
-        '';
-      };
-
-      "zitadel-login.env" = {
-        content = ''
-          ZITADEL_SESSION_COOKIE_SECRET=${config.sops.placeholder.zitadel-login-session-cookie}
         '';
       };
 
@@ -142,13 +133,6 @@
           Username: zitadel
           SSL:
             Mode: disable
-    SystemAPIUsers:
-      login-client:
-        Path: /secrets/login-client/tls.crt
-        Memberships:
-          - MemberType: System
-            Roles:
-              - IAM_LOGIN_CLIENT
   '';
 
   environment.etc."zitadel/steps.yaml".text = ''
@@ -162,7 +146,7 @@
           FirstName: ${builtins.toJSON site.identity.adminFirstName}
           LastName: ${builtins.toJSON site.identity.adminLastName}
           Email:
-            Address: ${builtins.toJSON "${site.identity.adminLocalPart}@${site.domain}"}
+            Address: ${builtins.toJSON site.contactEmail}
             Verified: true
           PasswordChangeRequired: true
         Machine:
@@ -177,13 +161,11 @@
     enable = true;
     globalConfig = ''
       admin 127.0.0.1:2019
-      email ${site.acmeEmail}
+      email ${site.contactEmail}
       metrics
     '';
     virtualHosts."auth.${site.domain}" = {
       extraConfig = ''
-        @login path /ui/v2/login /ui/v2/login/*
-        reverse_proxy @login 127.0.0.1:3000
         reverse_proxy h2c://127.0.0.1:8080
       '';
       logFormat = ''
@@ -240,37 +222,14 @@
           volumes = [
             "/etc/zitadel/config.yaml:/etc/zitadel/config.yaml:ro"
             "/etc/zitadel/steps.yaml:/etc/zitadel/steps.yaml:ro"
-            "/var/lib/zitadel-bootstrap/opentofu.json:/bootstrap/opentofu.json"
+            "/var/lib/zitadel-bootstrap/opentofu.json:/bootstrap/opentofu.json:U"
             "/run/postgresql:/run/postgresql:ro"
-            "${config.sops.secrets.zitadel-login-certificate.path}:/secrets/login-client/tls.crt:ro"
-          ];
-        };
-
-        zitadel-login = {
-          autoStart = false;
-          image = "ghcr.io/zitadel/zitadel-login@sha256:ee98f024ddbebce788a7faf5a4b5571d20cbddf3bca8d3923091c424f2855737";
-          dependsOn = [ "zitadel" ];
-          environment = {
-            CUSTOM_REQUEST_HEADERS = "Host:auth.${site.domain},X-Forwarded-Proto:https";
-            HOSTNAME = "0.0.0.0";
-            NEXT_PUBLIC_BASE_PATH = "/ui/v2/login";
-            ZITADEL_API_URL = "http://zitadel:8080";
-            ZITADEL_LOGINCLIENT_KEYFILE = "/secrets/login-client/tls.key";
-          };
-          environmentFiles = [ config.sops.templates."zitadel-login.env".path ];
-          ports = [ "127.0.0.1:3000:3000" ];
-          user = "0";
-          volumes = [
-            "${config.sops.secrets.zitadel-login-private-key.path}:/secrets/login-client/tls.key:ro"
           ];
         };
       };
     };
 
-    podman = {
-      enable = true;
-      defaultNetwork.settings.dns_enabled = true;
-    };
+    podman.enable = true;
   };
 
   systemd.services.postgresql-setup = {

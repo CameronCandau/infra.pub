@@ -5,7 +5,7 @@ resource "zitadel_login_policy" "organization" {
   allow_external_idp            = false
   force_mfa                     = false
   force_mfa_local_only          = false
-  disable_login_with_email      = true
+  disable_login_with_email      = false
   passwordless_type             = "PASSWORDLESS_TYPE_ALLOWED"
   hide_password_reset           = true
   password_check_lifetime       = "240h0m0s"

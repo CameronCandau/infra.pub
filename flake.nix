@@ -34,7 +34,7 @@
         inventory = builtins.fromJSON (builtins.readFile ./examples/inventory.json);
         site = {
           domain = infraLib.readDomainEnv ./examples/domain.env;
-          acmeEmail = "admin@example.test";
+          contactEmail = "admin@example.test";
           forgejoRunnerUuid = "00000000-0000-0000-0000-000000000001";
           identity = {
             organizationName = "Example";

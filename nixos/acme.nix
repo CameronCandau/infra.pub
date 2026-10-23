@@ -22,7 +22,7 @@
     acceptTerms = true;
 
     defaults = {
-      email = site.acmeEmail;
+      email = site.contactEmail;
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       environmentFile = config.sops.templates."cloudflare.env".path;
