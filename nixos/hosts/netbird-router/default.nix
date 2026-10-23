@@ -1,11 +1,25 @@
-{ inventory, ... }:
+{
+  inventory,
+  netbirdPackage,
+  site,
+  ...
+}:
 let
   machine = inventory.machines.netbird-router;
 in
 {
   imports = [ ../../image.nix ];
 
-  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+  services.netbird = {
+    package = netbirdPackage;
+    useRoutingFeatures = "server";
+    clients.wt0 = {
+      name = "netbird";
+      interface = "wt0";
+      port = 51820;
+      environment.NB_MANAGEMENT_URL = "https://netbird.${site.domain}:443";
+    };
+  };
 
   networking = {
     hostName = "netbird-router";

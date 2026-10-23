@@ -42,6 +42,10 @@
             adminFirstName = "Example";
             adminLastName = "Admin";
           };
+          netbird = {
+            enable = true;
+            localAuthDisabled = false;
+          };
         };
         secretFiles = infraLib.singleSecretFile ./examples/secrets.yaml;
       };

@@ -27,6 +27,7 @@ let
       forgejo-runner = path;
       identity = path;
       k3s = path;
+      netbird = path;
       observability = path;
       openbao = path;
       postgres = path;
@@ -74,6 +75,7 @@ let
               sops-nix
               ;
             openbaoPackage = nixpkgs-unstable.legacyPackages.${hostSystem}.openbao;
+            netbirdPackage = nixpkgs-unstable.legacyPackages.${hostSystem}.netbird;
           };
           modules = [ module ];
         };
@@ -100,6 +102,7 @@ let
       openbao = mkDefaultSystem ../nixos/hosts/openbao;
       netbird-router = mkDefaultSystem ../nixos/hosts/netbird-router;
       identity = mkSystem "aarch64-linux" ../nixos/hosts/identity;
+      netbird = mkSystem "aarch64-linux" ../nixos/hosts/netbird;
     };
 in
 {
