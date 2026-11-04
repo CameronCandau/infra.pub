@@ -1,0 +1,84 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: zitadel
+  namespace: zitadel
+spec:
+  interval: 1h
+  timeout: 10m
+  chart:
+    spec:
+      chart: zitadel
+      version: "10.3.0"
+      sourceRef:
+        kind: HelmRepository
+        name: zitadel
+      interval: 1h
+  values:
+    replicaCount: 1
+    tools:
+      kubectl:
+        image:
+          tag: "1.35.9"
+
+    postgresql:
+      enabled: false
+
+    ingress:
+      enabled: true
+      className: traefik
+      hosts:
+        - host: auth.${DOMAIN}
+          paths:
+            - path: /
+              pathType: Prefix
+
+    env:
+      - name: ZITADEL_DATABASE_POSTGRES_DSN
+        valueFrom:
+          secretKeyRef:
+            name: zitadel-environment
+            key: dsn
+      - name: ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: zitadel-environment
+            key: initial-admin-password
+
+    zitadel:
+      masterkeySecretName: zitadel-masterkey
+      configmapConfig:
+        ExternalDomain: auth.${DOMAIN}
+        ExternalPort: 443
+        ExternalSecure: true
+        TLS:
+          Enabled: false
+        ServicePing:
+          Enabled: false
+        FirstInstance:
+          InstanceName: ${ZITADEL_ORGANIZATION}
+          Org:
+            Name: ${ZITADEL_ORGANIZATION}
+            Human:
+              UserName: ${ZITADEL_ADMIN_LOCALPART}@${DOMAIN}
+              FirstName: ${ZITADEL_ADMIN_FIRST_NAME}
+              LastName: ${ZITADEL_ADMIN_LAST_NAME}
+              Email:
+                Address: ${ZITADEL_ADMIN_LOCALPART}@${DOMAIN}
+                Verified: true
+              PasswordChangeRequired: true
+
+    initJob:
+      command: zitadel
+
+    login:
+      replicaCount: 1
+      sessionCookieSecretName: zitadel-login-session
+      ingress:
+        enabled: true
+        className: traefik
+        hosts:
+          - host: auth.${DOMAIN}
+            paths:
+              - path: /ui/v2/login
+                pathType: Prefix
