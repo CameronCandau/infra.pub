@@ -204,10 +204,9 @@
   virtualisation = {
     oci-containers = {
       backend = "podman";
-      # Keep the empty database untouched until fresh-instance bootstrap is approved.
       containers = {
         zitadel = {
-          autoStart = false;
+          autoStart = true;
           image = "ghcr.io/zitadel/zitadel@sha256:956a298405189a8f6cd4ec92e8828b1bd10caa7da8b139c39d251d7053e33784";
           cmd = [
             "start-from-init"
