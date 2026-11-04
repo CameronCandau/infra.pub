@@ -78,8 +78,8 @@ in
       };
       service = {
         ALLOW_ONLY_EXTERNAL_REGISTRATION = true;
-        DISABLE_REGISTRATION             = false;
-        ENABLE_INTERNAL_SIGNIN            = true;
+        DISABLE_REGISTRATION = false;
+        ENABLE_INTERNAL_SIGNIN = true;
       };
       oauth2_client = {
         ACCOUNT_LINKING = "auto";
