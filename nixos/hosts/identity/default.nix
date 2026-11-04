@@ -295,13 +295,19 @@
     pgbackrest-stanza-create = {
       description = "Create pgBackRest stanza";
       wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ];
       requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
+      after = [
+        "network-online.target"
+        "postgresql.service"
+      ];
 
       serviceConfig = {
         Type = "oneshot";
         User = "postgres";
         Group = "postgres";
+        Restart = "on-failure";
+        RestartSec = "30s";
         ExecStart = "${pkgs.pgbackrest}/bin/pgbackrest --stanza=default stanza-create";
       };
     };
