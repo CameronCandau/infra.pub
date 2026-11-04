@@ -69,12 +69,6 @@ in
       backup_s3_region.sopsFile = secretFiles.backupStorage;
       backup_s3_bucket.sopsFile = secretFiles.backupStorage;
 
-      zitadel-db-password = {
-        owner = "postgres";
-        group = "postgres";
-        mode = "0400";
-        restartUnits = [ "postgresql-setup.service" ];
-      };
       immich-db-password = {
         owner = "postgres";
         group = "postgres";
@@ -129,7 +123,6 @@ in
 
     ensureDatabases = [
       "immich"
-      "zitadel"
     ];
 
     ensureUsers = [
@@ -137,29 +130,21 @@ in
         name = "immich";
         ensureDBOwnership = true;
       }
-      {
-        name = "zitadel";
-        ensureDBOwnership = true;
-      }
     ];
 
     authentication = ''
       hostssl postgres,template1 immich ${inventory.machines.k3s.address}/32 scram-sha-256
       hostssl immich immich ${inventory.machines.k3s.address}/32 scram-sha-256
-      hostssl zitadel zitadel ${inventory.machines.k3s.address}/32 scram-sha-256
     '';
   };
 
   systemd.services.postgresql-setup.postStart = ''
-    zitadel_password="$(${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.zitadel-db-password.path})"
     immich_password="$(${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.immich-db-password.path})"
 
     ${lib.getExe' config.services.postgresql.finalPackage "psql"} \
       --dbname=postgres \
       --set=ON_ERROR_STOP=1 \
-      --set=zitadel_password="$zitadel_password" \
       --set=immich_password="$immich_password" <<'SQL'
-    ALTER ROLE zitadel WITH LOGIN PASSWORD :'zitadel_password';
     ALTER ROLE immich WITH LOGIN PASSWORD :'immich_password';
 
     \connect immich

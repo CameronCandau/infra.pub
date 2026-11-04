@@ -5,6 +5,3 @@ resources:
   - immich/repository.yaml
   - immich/release.yaml
   - immich/storage.yaml
-  - zitadel/namespace.yaml
-  - zitadel/repository.yaml
-  - zitadel/release.yaml

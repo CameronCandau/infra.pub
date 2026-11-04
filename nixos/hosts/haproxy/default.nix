@@ -84,9 +84,6 @@ in
 
               use_backend grafana if host_grafana
 
-              acl host_zitadel hdr(host) -i auth.${site.domain}
-              use_backend zitadel if host_zitadel
-
               use_backend immich if host_immich source_lan
               use_backend immich if host_immich source_netbird_router destination_user_services
               use_backend openbao if host_openbao source_lan
@@ -107,9 +104,6 @@ in
 
       backend grafana
               server grafana ${inventory.machines.observability.address}:3000 check
-
-      backend zitadel
-              server zitadel ${inventory.machines.k3s.address}:80 check proto h2
 
       backend immich
               server immich ${inventory.machines.k3s.address}:80 check
