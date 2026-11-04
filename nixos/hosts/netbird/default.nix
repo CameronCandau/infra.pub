@@ -132,6 +132,14 @@ in
       admin 127.0.0.1:2019
       email ${site.contactEmail}
       metrics
+
+      servers {
+        timeouts {
+          # shortcut: NetBird's idle Job stream trips Caddy 2.11's body guard; remove after NetBird ships bidirectional heartbeats.
+          read_body_idle -1s
+        }
+        
+      }
     '';
     virtualHosts.${domain} = {
       extraConfig = ''
