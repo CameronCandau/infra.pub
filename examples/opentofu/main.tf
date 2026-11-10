@@ -49,6 +49,7 @@ module "zitadel" {
     reply_to_address = "admin@example.test"
     description      = "Example SMTP"
   }
-  immich_user_keys  = ["example"]
-  forgejo_user_keys = ["example"]
+  immich_user_keys      = ["example"]
+  forgejo_user_keys     = ["example"]
+  timetracker_user_keys = ["example"]
 }

@@ -75,6 +75,13 @@ in
         mode = "0400";
         restartUnits = [ "postgresql-setup.service" ];
       };
+
+      timetracker-db-password = {
+        owner = "postgres";
+        group = "postgres";
+        mode = "0400";
+        restartUnits = [ "postgresql-setup.service" ];
+      };
     };
 
     templates."pgbackrest-remote.conf" = {
@@ -123,6 +130,7 @@ in
 
     ensureDatabases = [
       "immich"
+      "timetracker"
     ];
 
     ensureUsers = [
@@ -130,22 +138,31 @@ in
         name = "immich";
         ensureDBOwnership = true;
       }
+      {
+        name = "timetracker";
+        ensureDBOwnership = true;
+      }
     ];
 
     authentication = ''
       hostssl postgres,template1 immich ${inventory.machines.k3s.address}/32 scram-sha-256
       hostssl immich immich ${inventory.machines.k3s.address}/32 scram-sha-256
+      hostssl postgres,template1 timetracker ${inventory.machines.k3s.address}/32 scram-sha-256
+      hostssl timetracker timetracker ${inventory.machines.k3s.address}/32 scram-sha-256
     '';
   };
 
   systemd.services.postgresql-setup.postStart = ''
     immich_password="$(${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.immich-db-password.path})"
+    timetracker_password="$(${pkgs.coreutils}/bin/tr -d '\n' < ${config.sops.secrets.timetracker-db-password.path})"
 
     ${lib.getExe' config.services.postgresql.finalPackage "psql"} \
       --dbname=postgres \
       --set=ON_ERROR_STOP=1 \
-      --set=immich_password="$immich_password" <<'SQL'
+      --set=immich_password="$immich_password" \
+      --set=timetracker_password="$timetracker_password" <<'SQL'
     ALTER ROLE immich WITH LOGIN PASSWORD :'immich_password';
+    ALTER ROLE timetracker WITH LOGIN PASSWORD :'timetracker_password';
 
     \connect immich
     CREATE EXTENSION IF NOT EXISTS vchord CASCADE;

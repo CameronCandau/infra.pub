@@ -47,3 +47,7 @@ variable "forgejo_user_keys" {
   type = set(string)
 }
 
+variable "timetracker_user_keys" {
+  type = set(string)
+}
+
