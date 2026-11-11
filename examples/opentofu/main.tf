@@ -51,5 +51,5 @@ module "zitadel" {
   }
   immich_user_keys      = ["example"]
   forgejo_user_keys     = ["example"]
-  timetracker_user_keys = ["example"]
+  kimai_user_keys       = ["example"]
 }
