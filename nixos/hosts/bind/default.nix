@@ -56,7 +56,7 @@ in
       file = pkgs.writeText site.domain ''
         $TTL 300
         @ IN SOA ns1.${site.domain}. hostmaster.${site.domain}. (
-                2026111001	;	serial
+                2026111101	;	serial
                 3600	;	refresh
                 900	;	retry
                 604800	;	expire
@@ -76,6 +76,7 @@ in
         forgejo	IN	A	${inventory.serviceVips.user}
         grafana	IN	A	${inventory.serviceVips.admin}
         bao	IN	A	${inventory.serviceVips.admin}
+        hermes	IN	A	${inventory.serviceVips.admin}
 
         pve01	IN	A	${inventory.network.gateway}
       '';
