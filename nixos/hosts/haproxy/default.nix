@@ -76,10 +76,7 @@ in
               acl destination_admin_services dst ${inventory.serviceVips.admin}
               http-request deny deny_status 404 if host_openbao !source_lan
               http-request deny deny_status 404 if host_immich !source_lan !source_netbird_router
-              acl source_identity src ${site.identity.publicIPv4}
-              acl path_kimai_metadata path -i /auth/saml/metadata
-              http-request deny deny_status 404 if host_kimai !source_lan !source_netbird_router !source_identity
-              http-request deny deny_status 404 if host_kimai source_identity !path_kimai_metadata
+              http-request deny deny_status 404 if host_kimai !source_lan !source_netbird_router
               http-request deny deny_status 404 if source_netbird_router host_immich !destination_user_services
               http-request deny deny_status 404 if source_netbird_router host_kimai !destination_user_services
               http-request deny deny_status 404 if source_netbird_router host_forgejo !destination_user_services
@@ -94,7 +91,6 @@ in
               use_backend immich if host_immich source_netbird_router destination_user_services
               use_backend kimai if host_kimai source_lan
               use_backend kimai if host_kimai source_netbird_router destination_user_services
-              use_backend kimai if host_kimai source_identity path_kimai_metadata
               use_backend openbao if host_openbao source_lan
 
               default_backend unknown-host

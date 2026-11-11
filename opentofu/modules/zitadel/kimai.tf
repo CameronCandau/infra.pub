@@ -12,11 +12,21 @@ resource "zitadel_project_role" "kimai_admin" {
   display_name = "Kimai Administrator"
 }
 
+data "http" "kimai_saml_metadata" {
+  url = "https://time.${var.domain}/auth/saml/metadata"
+
+  retry {
+    attempts     = 3
+    min_delay_ms = 1000
+    max_delay_ms = 5000
+  }
+}
+
 resource "zitadel_application_saml" "kimai" {
   org_id       = local.organization_id
   project_id   = zitadel_project.kimai.id
   name         = "Kimai"
-  metadata_url = "https://time.${var.domain}/auth/saml/metadata"
+  metadata_xml = data.http.kimai_saml_metadata.response_body
 
   login_version {
     login_v1 = true
