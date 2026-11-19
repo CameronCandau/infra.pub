@@ -126,7 +126,6 @@ in
       ProtectSystem = "strict";
       PrivateTmp = true;
       PrivateDevices = true;
-      RestrictSUIDSGID = true;
 
       WorkingDirectory = "/var/lib/forgejo-runner";
       LoadCredential = "config.yaml:${config.sops.templates."forgejo-runner.yaml".path}";
