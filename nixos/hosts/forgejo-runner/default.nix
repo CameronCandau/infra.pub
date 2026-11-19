@@ -90,7 +90,8 @@ in
     after = [ "network-online.target" ];
 
     path =
-      (with pkgs; [
+      [ "/run/wrappers" ]
+      ++ (with pkgs; [
         bash
         coreutils
         curl
