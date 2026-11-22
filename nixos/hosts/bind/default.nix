@@ -57,6 +57,13 @@ in
           rory.ns.cloudflare.com.;
         };
       };
+      zone "netbird.${site.domain}" {
+        type static-stub;
+        server-names {
+          leia.ns.cloudflare.com.;
+          rory.ns.cloudflare.com.;
+        };
+      };
     '';
 
     zones.${site.domain} = {
@@ -75,7 +82,7 @@ in
         @ 	IN	NS	ns1.${site.domain}.
         ns1	IN	A	${machine.address}
         postgres  IN  A ${inventory.machines.postgres.address}
-        netbird   IN  A ${site.netbird.publicIPv4}
+        stun      IN  A ${site.netbird.publicIPv4}
 
         @	IN	A	${inventory.machines.haproxy.address}
         *	IN	A	${inventory.machines.haproxy.address}
