@@ -51,9 +51,11 @@ in
     forwarders = [ ];
     extraConfig = ''
       zone "auth.${site.domain}" {
-        type forward;
-        forward only;
-        forwarders { 1.1.1.1; 1.0.0.1; };
+        type static-stub;
+        server-names {
+          leia.ns.cloudflare.com.;
+          rory.ns.cloudflare.com.;
+        };
       };
     '';
 
