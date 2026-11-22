@@ -49,6 +49,13 @@ in
     cacheNetworks = trustedNetworks;
 
     forwarders = [ ];
+    extraConfig = ''
+      zone "auth.${site.domain}" {
+        type forward;
+        forward only;
+        forwarders { 1.1.1.1; 1.0.0.1; };
+      };
+    '';
 
     zones.${site.domain} = {
       master = true;
@@ -66,7 +73,6 @@ in
         @ 	IN	NS	ns1.${site.domain}.
         ns1	IN	A	${machine.address}
         postgres  IN  A ${inventory.machines.postgres.address}
-        auth      IN  A ${site.identity.publicIPv4}
         netbird   IN  A ${site.netbird.publicIPv4}
 
         @	IN	A	${inventory.machines.haproxy.address}
