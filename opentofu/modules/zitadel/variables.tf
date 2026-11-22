@@ -51,3 +51,7 @@ variable "kimai_user_keys" {
   type = set(string)
 }
 
+variable "nextcloud_user_keys" {
+  type = set(string)
+}
+

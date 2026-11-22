@@ -118,6 +118,21 @@
       "cores": 1,
       "memory": 1024,
       "diskSize": 16
+    },
+    "nextcloud": {
+      "vmId": 110,
+      "address": "192.0.2.23",
+      "macAddress": "02:00:00:00:00:23",
+      "cores": 2,
+      "memory": 4096,
+      "diskSize": 30,
+      "dataDisks": [
+        {
+          "interface": "virtio1",
+          "size": 50,
+          "serial": "nextcloud-data"
+        }
+      ]
     }
   },
   "ubuntuMachines": {

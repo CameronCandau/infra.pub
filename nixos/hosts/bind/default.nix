@@ -88,6 +88,7 @@ in
         *	IN	A	${inventory.machines.haproxy.address}
         immich	IN	A	${inventory.serviceVips.user}
         time	IN	A	${inventory.serviceVips.user}
+        cloud	IN	A	${inventory.serviceVips.user}
         forgejo	IN	A	${inventory.serviceVips.user}
         grafana	IN	A	${inventory.serviceVips.admin}
         bao	IN	A	${inventory.serviceVips.admin}

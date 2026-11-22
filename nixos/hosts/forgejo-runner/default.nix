@@ -89,21 +89,22 @@ in
     wants = [ "network-online.target" ];
     after = [ "network-online.target" ];
 
-    path =
-      [ "/run/wrappers" ]
-      ++ (with pkgs; [
-        bash
-        coreutils
-        curl
-        gawk
-        gitMinimal
-        gnused
-        nodejs
-        wget
-        nix
-        opentofu
-      ])
-      ++ [ config.virtualisation.podman.package ];
+    path = [
+      "/run/wrappers"
+    ]
+    ++ (with pkgs; [
+      bash
+      coreutils
+      curl
+      gawk
+      gitMinimal
+      gnused
+      nodejs
+      wget
+      nix
+      opentofu
+    ])
+    ++ [ config.virtualisation.podman.package ];
 
     environment = {
       HOME = "/var/lib/forgejo-runner";

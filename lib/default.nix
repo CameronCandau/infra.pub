@@ -28,6 +28,7 @@ let
       identity = path;
       k3s = path;
       netbird = path;
+      nextcloud = path;
       observability = path;
       openbao = path;
       postgres = path;
@@ -101,6 +102,7 @@ let
       k3s = mkDefaultSystem ../nixos/hosts/k3s;
       openbao = mkDefaultSystem ../nixos/hosts/openbao;
       netbird-router = mkDefaultSystem ../nixos/hosts/netbird-router;
+      nextcloud = mkDefaultSystem ../nixos/hosts/nextcloud;
       identity = mkSystem "aarch64-linux" ../nixos/hosts/identity;
       netbird = mkSystem "aarch64-linux" ../nixos/hosts/netbird;
     };
