@@ -148,6 +148,12 @@ in
           store:
             engine: "sqlite"
             encryptionKey: ${config.sops.placeholder.netbird-store-encryption-key}
+
+        relay:
+          stun:
+            enabled: true
+            ports:
+              - 3478
       '';
     };
   };
