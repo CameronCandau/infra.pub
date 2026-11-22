@@ -90,8 +90,6 @@ in
         server:
           listenAddress: ":80"
           exposedAddress: "https://${domain}:443"
-          stunPorts:
-            - 3478
           stuns:
             - uri: "stun:stun.${site.domain}:3478"
           metricsPort: 9090
@@ -149,13 +147,18 @@ in
             engine: "sqlite"
             encryptionKey: ${config.sops.placeholder.netbird-store-encryption-key}
 
-        relay:
-          stun:
-            enabled: true
-            ports:
-              - 3478
       '';
     };
+  };
+
+  services.coturn = lib.mkIf site.netbird.enable {
+    enable = true;
+    no-auth = true;
+    no-tcp = true;
+    no-tls = true;
+    no-dtls = true;
+    no-cli = true;
+    extraConfig = "stun-only";
   };
 
   services.caddy = lib.mkIf site.netbird.enable {
@@ -209,7 +212,6 @@ in
           ];
           ports = [
             "127.0.0.1:8081:80"
-            "3478:3478/udp"
           ];
           volumes = [
             "${config.sops.templates."netbird-config.yaml".path}:/etc/netbird/config.yaml:ro"
