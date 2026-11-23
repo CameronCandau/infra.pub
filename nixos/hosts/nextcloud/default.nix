@@ -95,6 +95,7 @@ in
       user_oidc = {
         auto_provision = true;
         soft_auto_provision = true;
+        enrich_login_id_token_with_userinfo = true;
       };
     };
   };
