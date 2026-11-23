@@ -28,6 +28,11 @@ resource "zitadel_application_saml" "kimai" {
   name         = "Kimai"
   metadata_xml = data.http.kimai_saml_metadata.response_body
 
+  lifecycle {
+    # shortcut: ZITADEL normalizes SAML XML, remove this to apply a real Kimai metadata change.
+    ignore_changes = [metadata_xml]
+  }
+
   login_version {
     login_v1 = true
   }
