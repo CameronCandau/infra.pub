@@ -81,7 +81,7 @@ in
     };
 
     extraApps = {
-      inherit (pkgs.nextcloud35Packages.apps) user_oidc;
+      inherit (pkgs.nextcloud35Packages.apps) calendar contacts user_oidc;
     };
 
     settings = {
