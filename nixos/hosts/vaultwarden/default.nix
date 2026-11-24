@@ -53,6 +53,7 @@ in
       vaultwarden-oidc-client-id.restartUnits = [ "vaultwarden.service" ];
       vaultwarden-oidc-client-secret.restartUnits = [ "vaultwarden.service" ];
       vaultwarden-oidc-project-id.restartUnits = [ "vaultwarden.service" ];
+      vaultwarden-smtp-password.restartUnits = [ "vaultwarden.service" ];
       backup_s3_access_key_id = { };
       backup_s3_secret_access_key = { };
       backup_restic_password = { };
@@ -67,6 +68,7 @@ in
     SSO_CLIENT_ID=${config.sops.placeholder.vaultwarden-oidc-client-id}
     SSO_CLIENT_SECRET=${config.sops.placeholder.vaultwarden-oidc-client-secret}
     SSO_AUDIENCE_TRUSTED=^${config.sops.placeholder.vaultwarden-oidc-project-id}$
+    SMTP_PASSWORD=${config.sops.placeholder.vaultwarden-smtp-password}
   '';
 
   services.vaultwarden = {
@@ -89,6 +91,12 @@ in
       SSO_AUTHORITY = "https://auth.${site.domain}";
       SSO_SCOPES = "email profile offline_access";
       SSO_PKCE = true;
+      SMTP_HOST = site.vaultwarden.smtpHost;
+      SMTP_PORT = 587;
+      SMTP_SECURITY = "starttls";
+      SMTP_FROM = "vaultwarden@${site.domain}";
+      SMTP_FROM_NAME = "Vaultwarden";
+      SMTP_USERNAME = site.vaultwarden.smtpUser;
     };
   };
 

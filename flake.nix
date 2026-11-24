@@ -48,6 +48,10 @@
             localAuthDisabled = false;
             publicIPv4 = "192.0.2.2";
           };
+          vaultwarden = {
+            smtpHost = "smtp.example.test";
+            smtpUser = "example";
+          };
           observability = {
             smtpHost = "smtp.example.test:587";
             smtpUser = "example";
