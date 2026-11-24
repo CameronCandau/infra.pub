@@ -29,6 +29,7 @@ let
       k3s = path;
       netbird = path;
       nextcloud = path;
+      vaultwarden = path;
       observability = path;
       openbao = path;
       postgres = path;
@@ -75,6 +76,7 @@ let
               site
               sops-nix
               ;
+            vaultwardenPackage = nixpkgs-unstable.legacyPackages.${hostSystem}.vaultwarden;
             openbaoPackage = nixpkgs-unstable.legacyPackages.${hostSystem}.openbao;
             netbirdPackage = nixpkgs-unstable.legacyPackages.${hostSystem}.netbird;
           };
@@ -103,6 +105,7 @@ let
       openbao = mkDefaultSystem ../nixos/hosts/openbao;
       netbird-router = mkDefaultSystem ../nixos/hosts/netbird-router;
       nextcloud = mkDefaultSystem ../nixos/hosts/nextcloud;
+      vaultwarden = mkDefaultSystem ../nixos/hosts/vaultwarden;
       identity = mkSystem "aarch64-linux" ../nixos/hosts/identity;
       netbird = mkSystem "aarch64-linux" ../nixos/hosts/netbird;
     };

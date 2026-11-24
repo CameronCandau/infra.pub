@@ -51,6 +51,11 @@ variable "kimai_user_keys" {
   type = set(string)
 }
 
+variable "vaultwarden_user_keys" {
+  type    = set(string)
+  default = []
+}
+
 variable "nextcloud_user_keys" {
   type = set(string)
 }

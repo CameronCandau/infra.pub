@@ -69,6 +69,7 @@ in
               acl host_immich hdr(host) -i immich.${site.domain}
               acl host_kimai hdr(host) -i time.${site.domain}
               acl host_nextcloud hdr(host) -i cloud.${site.domain}
+              acl host_vaultwarden hdr(host) -i vaultwarden.${site.domain}
               acl host_forgejo hdr(host) -i forgejo.${site.domain}
               acl host_grafana hdr(host) -i grafana.${site.domain}
               acl host_hermes hdr(host) -i hermes.${site.domain}
@@ -80,10 +81,12 @@ in
               http-request deny deny_status 404 if host_immich !source_lan !source_netbird_router
               http-request deny deny_status 404 if host_kimai !source_lan !source_netbird_router
               http-request deny deny_status 404 if host_nextcloud !source_lan !source_netbird_router
+              http-request deny deny_status 404 if host_vaultwarden !source_lan !source_netbird_router
               http-request deny deny_status 404 if host_hermes !source_lan !source_netbird_router
               http-request deny deny_status 404 if source_netbird_router host_immich !destination_user_services
               http-request deny deny_status 404 if source_netbird_router host_kimai !destination_user_services
               http-request deny deny_status 404 if source_netbird_router host_nextcloud !destination_user_services
+              http-request deny deny_status 404 if source_netbird_router host_vaultwarden !destination_user_services
               http-request deny deny_status 404 if source_netbird_router host_forgejo !destination_user_services
               http-request deny deny_status 404 if source_netbird_router host_grafana !destination_admin_services
               http-request deny deny_status 404 if source_netbird_router host_openbao !destination_admin_services
@@ -98,7 +101,9 @@ in
               use_backend kimai if host_kimai source_lan
               use_backend kimai if host_kimai source_netbird_router destination_user_services
               use_backend nextcloud if host_nextcloud source_lan
+              use_backend vaultwarden if host_vaultwarden source_lan
               use_backend nextcloud if host_nextcloud source_netbird_router destination_user_services
+              use_backend vaultwarden if host_vaultwarden source_netbird_router destination_user_services
               use_backend openbao if host_openbao source_lan
               use_backend hermes if host_hermes source_lan
               use_backend hermes if host_hermes source_netbird_router destination_admin_services
@@ -128,6 +133,10 @@ in
 
       backend nextcloud
               server nextcloud ${inventory.machines.nextcloud.address}:80 check
+
+      backend vaultwarden
+              timeout tunnel 1h
+              server vaultwarden ${inventory.machines.vaultwarden.address}:8222 check
 
       backend openbao
               server openbao ${inventory.machines.openbao.address}:8200 check ssl verify required ca-file /etc/ssl/certs/ca-bundle.crt sni str(bao.${site.domain}) verifyhost bao.${site.domain}

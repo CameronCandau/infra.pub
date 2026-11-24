@@ -119,6 +119,21 @@
       "memory": 1024,
       "diskSize": 16
     },
+    "vaultwarden": {
+      "vmId": 111,
+      "address": "192.0.2.24",
+      "macAddress": "02:00:00:00:00:24",
+      "cores": 2,
+      "memory": 2048,
+      "diskSize": 20,
+      "dataDisks": [
+        {
+          "interface": "virtio1",
+          "size": 10,
+          "serial": "vaultwarden-data"
+        }
+      ]
+    },
     "nextcloud": {
       "vmId": 110,
       "address": "192.0.2.23",

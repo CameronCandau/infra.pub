@@ -72,7 +72,7 @@ in
       file = pkgs.writeText site.domain ''
         $TTL 300
         @ IN SOA ns1.${site.domain}. hostmaster.${site.domain}. (
-                2026111101	;	serial
+                2026112401	;	serial
                 3600	;	refresh
                 900	;	retry
                 604800	;	expire
@@ -89,6 +89,7 @@ in
         immich	IN	A	${inventory.serviceVips.user}
         time	IN	A	${inventory.serviceVips.user}
         cloud	IN	A	${inventory.serviceVips.user}
+        vaultwarden IN A ${inventory.serviceVips.user}
         forgejo	IN	A	${inventory.serviceVips.user}
         grafana	IN	A	${inventory.serviceVips.admin}
         bao	IN	A	${inventory.serviceVips.admin}

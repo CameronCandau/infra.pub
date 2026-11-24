@@ -53,4 +53,5 @@ module "zitadel" {
   forgejo_user_keys     = ["example"]
   kimai_user_keys       = ["example"]
   nextcloud_user_keys   = ["example"]
+  vaultwarden_user_keys = ["example"]
 }
